@@ -217,7 +217,8 @@ WPARAM MainLoop()
 int main(int argc, char* argv[])
 {
 	cout << hex << uppercase;
-	mem = new CMem(reinterpret_cast<HANDLE>(atoi(argv[1])));
+	mem = new CMem(reinterpret_cast<HANDLE>(stoul(string(argv[1]), 0, 0)));
+	//mem = new CMem(reinterpret_cast<HANDLE>(atoi(argv[1])));
 	atexit(Shutdown);
 	SetupWindow();
 	CacheNames();

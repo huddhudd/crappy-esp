@@ -1,8 +1,10 @@
 #include "Utils.h"
 
-//defining data
-int s_width = 1366;	// 更新定义分辨率
-int s_height = 768; // 更新定义分辨率
+#define UWORLD 0x3A4F1A8
+#define GNAMES 0x3951F90
+
+int s_width		= 1600;	// 更新定义分辨率
+int s_height	= 900;	// 更新定义分辨率
 LPDIRECT3D9 d3d;
 LPDIRECT3DDEVICE9 d3ddev;
 HWND hWnd;
@@ -11,13 +13,12 @@ MARGINS  margin = { 0,0,s_width,s_height };
 LPD3DXFONT pFont;
 ID3DXLine* d3dLine;
 
-list<int> upper_part = { Bones::neck_01, Bones::Head, Bones::forehead };
-list<int> right_arm = { Bones::neck_01, Bones::upperarm_r, Bones::lowerarm_r, Bones::hand_r };
-list<int> left_arm = { Bones::neck_01, Bones::upperarm_l, Bones::lowerarm_l, Bones::hand_l };
-list<int> spine = { Bones::neck_01, Bones::spine_01, Bones::spine_02, Bones::pelvis };
-
-list<int> lower_right = { Bones::pelvis, Bones::thigh_r, Bones::calf_r, Bones::foot_r };
-list<int> lower_left = { Bones::pelvis, Bones::thigh_l, Bones::calf_l, Bones::foot_l };
+list<int> upper_part	= { Bones::neck_01,		Bones::Head,		Bones::forehead };
+list<int> right_arm		= { Bones::neck_01,		Bones::upperarm_r,	Bones::lowerarm_r,	Bones::hand_r };
+list<int> left_arm		= { Bones::neck_01,		Bones::upperarm_l,	Bones::lowerarm_l,	Bones::hand_l };
+list<int> spine			= { Bones::neck_01,		Bones::spine_01,	Bones::spine_02,	Bones::pelvis };
+list<int> lower_right	= { Bones::pelvis,		Bones::thigh_r,		Bones::calf_r,		Bones::foot_r };
+list<int> lower_left	= { Bones::pelvis,		Bones::thigh_l,		Bones::calf_l,		Bones::foot_l };
 
 list<list<int>> skeleton = { upper_part, right_arm, left_arm, spine, lower_right, lower_left };
 
@@ -30,14 +31,12 @@ int motorbike[5];
 int buggy[3];
 int boat = 0;
 int itemtype[2];
-//
-
 
 D3DXMATRIX Matrix(Vector3 rot, Vector3 origin = Vector3(0, 0, 0))
 {
-	float radPitch = (rot.x * float(M_PI) / 180.f);
-	float radYaw = (rot.y * float(M_PI) / 180.f);
-	float radRoll = (rot.z * float(M_PI) / 180.f);
+	float radPitch	= (rot.x * float(M_PI) / 180.f);
+	float radYaw	= (rot.y * float(M_PI) / 180.f);
+	float radRoll	= (rot.z * float(M_PI) / 180.f);
 
 	float SP = sinf(radPitch);
 	float CP = cosf(radPitch);
@@ -75,6 +74,7 @@ Vector3 WorldToScreen(Vector3 WorldLocation, FCameraCacheEntry CameraCacheL)
 	Vector3 Screenlocation = Vector3(0, 0, 0);
 
 	auto POV = CameraCacheL.POV;
+
 	Vector3 Rotation = POV.Rotation; // FRotator
 
 	D3DMATRIX tempMatrix = Matrix(Rotation); // Matrix
@@ -105,11 +105,12 @@ DWORD_PTR GetUWorldPtr()
 {
 	if (!mem)
 		return NULL;
-	global::pUWorld = mem->RPM<DWORD_PTR>(mem->GetBase() + 0x37D0528, 8); // 更新UWorld偏移  0x37D7818
-	global::pGameInstance = mem->RPM<DWORD_PTR>(global::pUWorld + 0x140, 8);
-	global::pLocalPlayerArray = mem->RPM<DWORD_PTR>(global::pGameInstance + 0x38, 8);
-	global::pLocalPlayer = mem->RPM<DWORD_PTR>(global::pLocalPlayerArray + 0x0, 8);
-	global::pViewportClient = mem->RPM<DWORD_PTR>(global::pLocalPlayer + 0x58, 8);
+
+	global::pUWorld				= mem->RPM<DWORD_PTR>(mem->GetBase() + UWORLD, 8);
+	global::pGameInstance		= mem->RPM<DWORD_PTR>(global::pUWorld + 0x140, 8);
+	global::pLocalPlayerArray	= mem->RPM<DWORD_PTR>(global::pGameInstance + 0x38, 8);
+	global::pLocalPlayer		= mem->RPM<DWORD_PTR>(global::pLocalPlayerArray + 0x0, 8);
+	global::pViewportClient		= mem->RPM<DWORD_PTR>(global::pLocalPlayer + 0x58, 8);
 
 	return mem->RPM<DWORD_PTR>(global::pViewportClient + 0x80, 8);
 }
@@ -119,11 +120,11 @@ void UpdateAddresses()
 	if (!mem)
 		return;
 
-	global::pUWorld = GetUWorldPtr();
-	global::pGameInstance = mem->RPM<DWORD_PTR>(global::pUWorld + 0x140, 8);
-	global::pLocalPlayerArray = mem->RPM<DWORD_PTR>(global::pGameInstance + 0x38, 8);
-	global::pLocalPlayer = mem->RPM<DWORD_PTR>(global::pLocalPlayerArray + 0x0, 8);
-	global::cameracache = GetCameraCache();
+	global::pUWorld				= GetUWorldPtr();
+	global::pGameInstance		= mem->RPM<DWORD_PTR>(global::pUWorld + 0x140, 8);
+	global::pLocalPlayerArray	= mem->RPM<DWORD_PTR>(global::pGameInstance + 0x38, 8);
+	global::pLocalPlayer		= mem->RPM<DWORD_PTR>(global::pLocalPlayerArray + 0x0, 8);
+	global::cameracache			= GetCameraCache();
 }
 
 Vector3 GetLocalPlayerPos()
@@ -183,7 +184,7 @@ FCameraCacheEntry GetCameraCache()
 
 std::string GetNameFromId(int ID)
 {
-	DWORD_PTR fNamePtr = mem->RPM<DWORD_PTR>(mem->RPM<DWORD_PTR>(mem->GetBase() + 0x36D3310, 0x8) + int(ID / 0x4000) * 8, 8); // 更新UName偏移  0x36DA610
+	DWORD_PTR fNamePtr = mem->RPM<DWORD_PTR>(mem->RPM<DWORD_PTR>(mem->GetBase() + GNAMES, 0x8) + int(ID / 0x4000) * 8, 8);
 	DWORD_PTR fName = mem->RPM<DWORD_PTR>(fNamePtr + 8 * int(ID % 0x4000), 8);
 	char name[64] = { NULL };
 	if (ReadProcessMemory(mem->GetHandle(), (LPVOID)(fName + 16), name, sizeof(name) - 2, NULL) != 0)
